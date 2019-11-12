@@ -11,8 +11,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import roc_auc_score, confusion_matrix, matthews_corrcoef, accuracy_score, f1_score
 import os
 import glob
-# import data
 
+# import data
 train_path = "Layer 1/L1_(1200x700)x300/Train/*.csv"
 test_path = "Layer 1/L1_(1200x700)x300/Test/*.csv"
 
@@ -42,7 +42,7 @@ file_name = ["AtomPairs2DCount","AtomPairs2D","EState", "Extended", "Fingerprint
 "KlekotaRothCount", "KlekotaRoth", "MACCS", "Pubchem", "SubstructureCount", "Substructure"]
 
 
-
+### Set StratifiedKFold and scaler 
 skf = StratifiedKFold(n_splits=5,shuffle=True,random_state=0)
 scaler = StandardScaler()
 
@@ -76,6 +76,7 @@ kernel = ["rbf", "linear", "sigmoid", "poly"]
 parameters = {'C': Cs, 'gamma' : gammas}
 
 SVM = svm.SVC(random_state=0, probability= True)
+
 ### Code score 
 def score_model(y_test,y_predicted):
     cm = confusion_matrix(y_test, y_predicted)
@@ -109,6 +110,7 @@ def tune_model(train,test):
     result = rf_grid.cv_results_
     return y_test,y_predicted,result, best_params, y_probability
 
+### Start tuning model 
 test_score = []
 accuracy = []
 roc_auc = []
@@ -129,6 +131,7 @@ for train, test, name in zip(train_data, test_data, file_name):
     score_model(y_test,y_predicted)
     df_pro[name] = tune_model_result[4]
 
+### Save results 
 df = pd.DataFrame({'Test score':test_score,'Accuracy':accuracy,'ROC_AUC_score':roc_auc
 ,'F1_score':f1,'Sensitivity':sensitivity,'Specificity':specificity,'MCC':MCC, 'best_params':best_params},index= file_name)
 df.to_csv('SVM_Score_balanced_accuracy.csv',header=True)
